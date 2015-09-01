@@ -4,9 +4,194 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:WPFSerialComTool"
+        xmlns:port ="clr-namespace:System.IO.Ports;assembly=System"
+        xmlns:sys  ="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="ComTool" Height="600" Width="768" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <ObjectDataProvider x:Key="enParity" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="port:Parity"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="enStopBit" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="port:StopBits"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <x:ArrayExtension x:Key="DataBits" Type="sys:String">
+            <sys:String>6</sys:String>
+            <sys:String>7</sys:String>
+            <sys:String>8</sys:String>
+        </x:ArrayExtension>
+        <x:ArrayExtension x:Key="BaudRate" Type="sys:String">
+            <sys:String>1200</sys:String>
+            <sys:String>2400</sys:String>
+            <sys:String>4800</sys:String>
+            <sys:String>9600</sys:String>
+            <sys:String>14400</sys:String>
+            <sys:String>19200</sys:String>
+            <sys:String>38400</sys:String>
+            <sys:String>56000</sys:String>
+            <sys:String>57600</sys:String>
+            <sys:String>115200</sys:String>
+        </x:ArrayExtension>
+    </Window.Resources>
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <GradientStop Color="#FF1899DC" Offset="0"/>
+            <GradientStop Color="#FF0C9497" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="164" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <GroupBox Header="设置" Margin="3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="26" />
+                    <RowDefinition Height="26" />
+                    <RowDefinition Height="26" />
+                    <RowDefinition Height="26" />
+                    <RowDefinition Height="26" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="69" />
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Grid.Row="0">端 口：</Label>
+                <ComboBox  ItemsSource="{Binding Port.PortNames}" x:Name="cmbPortName" Grid.Column="1" Grid.Row="0" VerticalAlignment="Center"></ComboBox>
+                <Label Grid.Column="0" Grid.Row="1">波特率：</Label>
+                <ComboBox  ItemsSource="{Binding Source={StaticResource BaudRate}}"  x:Name="cmbBaudRate" Grid.Column="1" Grid.Row="1" VerticalAlignment="Center"></ComboBox>
+                <Label Grid.Column="0" Grid.Row="2">数据位：</Label>
+                <ComboBox SelectedItem="{Binding Port.DataBits}" SelectedIndex="2" ItemsSource="{Binding Source={StaticResource DataBits}}" x:Name="cmbDataBit" Grid.Column="1" Grid.Row="2" VerticalAlignment="Center"></ComboBox>
+                <Label Grid.Column="0" Grid.Row="3">校验位：</Label>
+                <ComboBox SelectedItem="{Binding Port.Parity}" SelectedIndex="0" ItemsSource="{Binding Source={StaticResource enParity}}" x:Name="cmbParity" Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"></ComboBox>
+                <Label Grid.Column="0" Grid.Row="4">停止位：</Label>
+                <ComboBox SelectedItem="{Binding Port.StopBits}" SelectedIndex="1" ItemsSource="{Binding Source={StaticResource enStopBit}}" x:Name="cmbStopBit" Grid.Column="1" Grid.Row="4" VerticalAlignment="Center"></ComboBox>
+                <ToggleButton IsChecked="False" x:Name="btnOpenPort" Grid.ColumnSpan="2" Grid.Row="5" Height="36" Margin="10">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="关闭串口" ></Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content" Value="打开串口" ></Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <CheckBox IsChecked="{Binding Port.IsHexData}" Content="16进制" Grid.Row="6" VerticalAlignment="Center" Margin="6"/>
+                <CheckBox IsChecked="{Binding Port.IsShowDate}" Content="显示时间" Grid.Row="7" VerticalAlignment="Center" Margin="6"/>
+                <CheckBox IsChecked="{Binding Port.IsShowSend}" Content="显示发送" Grid.Row="8" VerticalAlignment="Center" Margin="6"/>
+                <ToggleButton IsChecked="{Binding IsStop}"  Grid.Column="1" Grid.Row="6" Margin="3" VerticalAlignment="Center">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="继 续" ></Setter>
+                                </Trigger>
+                                <Trigger Property="IsChecked" Value="False">
+                                    <Setter Property="Content" Value="暂 停" ></Setter>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
+                <Button x:Name="btnClearText" Content="清 空" Grid.Column="1" Grid.Row="7" Margin="3" VerticalAlignment="Center"/>
+                <Button x:Name="btnSave" Content="保 存" Grid.Column="1" Grid.Row="8" Margin="3" VerticalAlignment="Center"/>
+            </Grid>
+        </GroupBox>
+
+        <!--接收-->
+        <GroupBox Header="接收"  Grid.Column="2" Margin="3">
+            <!--<TextBox x:Name="txtRecData" TextWrapping="WrapWithOverflow" VerticalScrollBarVisibility="Auto" Margin="3"/>-->
+            <RichTextBox x:Name="txtRecData" VerticalScrollBarVisibility="Auto" Margin="3"/>
+        </GroupBox>
+
+        <!--发送1-->
+        <GroupBox Header="发送1" Grid.Row="1" Grid.ColumnSpan="3" MinHeight="80" Margin="3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="69"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding IsRecSend1}"  Content="接收后发送" Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Center"/>
+                <TextBlock Text="定时：" Grid.Row="1" VerticalAlignment="Center"/>
+                <ComboBox x:Name="cmbSend1" SelectedIndex="0" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="6" />
+                <Button x:Name="btnSend1" Content="发送" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Height="36" Margin="6"/>
+                <TextBox x:Name="txtSend1" TextWrapping="WrapWithOverflow"  VerticalScrollBarVisibility="Auto" Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="3"/>
+            </Grid>
+        </GroupBox>
+        <GroupBox Header="发送2" Grid.Row="2" Grid.ColumnSpan="3" MinHeight="80" Margin="3">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="69"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <CheckBox IsChecked="{Binding IsRecSend2}"  Content="接收后发送" Grid.Row="0" Grid.ColumnSpan="2" VerticalAlignment="Center"/>
+                <TextBlock Text="定时：" Grid.Row="1" VerticalAlignment="Center"/>
+                <ComboBox x:Name="cmbSend2" SelectedIndex="0" Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Margin="6" />
+                <Button x:Name="btnSend2" Content="发送" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" Height="36" Margin="6"/>
+                <TextBox x:Name="txtSend2" TextWrapping="WrapWithOverflow"  VerticalScrollBarVisibility="Auto" Grid.Column="3" Grid.Row="0" Grid.RowSpan="2" Margin="3"/>
+            </Grid>
+        </GroupBox>
+        <StatusBar Grid.Row="3" Grid.ColumnSpan="3" Background="{x:Null}">
+            <StatusBarItem Margin="10,0">
+                <Button x:Name="btnClearZero" Content=" 清 零 "></Button>
+            </StatusBarItem>
+            <StatusBarItem  Margin="10,3,0,3">
+                <TextBlock Text="接收："/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="0,3,10,3">
+                <TextBlock Text="{Binding Port.ReceiveDataCounter}"/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="10,3,0,3">
+                <TextBlock Text="接收字节："/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="0,3,10,3">
+                <TextBlock Text="{Binding Port.ReceiveBytesCounter}"/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="10,3,0,3">
+                <TextBlock Text="发送："/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="0,3,10,3">
+                <TextBlock Text="{Binding Port.SendDataCounter}" />
+            </StatusBarItem>
+            <StatusBarItem  Margin="10,3,0,3">
+                <TextBlock Text="发送字节："/>
+            </StatusBarItem>
+            <StatusBarItem  Margin="0,3,10,3">
+                <TextBlock Text="{Binding Port.SendBytesCounter}" />
+            </StatusBarItem>
+
+
+        </StatusBar>
     </Grid>
 </Window>
