@@ -111,7 +111,7 @@ namespace WPFSerialComTool
             {
                 SaveFileDialog sfd = new SaveFileDialog()
                 {
-                    Filter = "文本|*.txt"
+                    Filter = "文本|*.log"
                 };
                 if (sfd.ShowDialog() == true)
                 {
