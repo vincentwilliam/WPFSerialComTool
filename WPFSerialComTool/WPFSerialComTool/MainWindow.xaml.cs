@@ -38,6 +38,7 @@ namespace WPFSerialComTool
 
         public MainWindow()
         {
+
             InitializeComponent();
 
             Port = new SerialPortModel();
