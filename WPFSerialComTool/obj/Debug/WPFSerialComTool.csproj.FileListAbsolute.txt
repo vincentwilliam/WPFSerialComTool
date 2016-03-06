@@ -1,0 +1,2 @@
+E:\Private\Code\C#\WPFSerialComTool\WPFSerialComTool\WPFSerialComTool\bin\Debug\WPFSerialComTool.exe.config
+E:\Private\Code\C#\WPFSerialComTool\WPFSerialComTool\WPFSerialComTool\obj\Debug\WPFSerialComTool.exe
